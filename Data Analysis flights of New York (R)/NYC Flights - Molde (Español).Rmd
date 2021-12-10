@@ -1,0 +1,300 @@
+---
+title: "NYC Flights"
+author: "Emanuel Rodriguez Bedeman"
+date: "4/12/2021"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+```
+
+# Investigacion sobre los vuelos desde NYC a Atlanta (ATL)
+
+Me ha despertado la curiosidad de inverstigar los vuelos que salen a Atlanta desde NYC.
+
+```{r, echo = FALSE}
+data <- nycflights13::flights
+datos2 = data[data$dest=="ATL",]
+datos_atl = na.omit(datos2)
+```
+
+Del total de vuelos $(`r nrow(data)`)$, solamente $`r nrow(datos_atl)`$ fueron hacia Atlanta. Lo que, dicho en porcentaje, es igual al $(\frac{Total\_Vuelos}{Vuelos\_Atlanta}) \cdot 100 =`r signif(nrow(datos_atl) / nrow(data) * 100, 2)` \%$ del total de vuelos.
+
+Ahora veamos, que aerolineas estan disponibles desde _New York City_ a _Atlanta_:
+
+\newpage
+
+```{r barplot frecuencia absoluta, echo = FALSE}
+carriers_abs = sort(table(datos_atl$carrier), decreasing = TRUE)
+
+BP_abs = barplot(carriers_abs[c(1:7)],ylim = c(0,12000), 
+        main = "Frecuencias Absolutas de los vuelos a Atlanta por carriers",
+        ylab = "Nº de vuelos (1k = 1000)", yaxt = "n",
+        col = c("firebrick1","gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+
+axis(2, at=c(0,2000,4000,6000,8000,10000,12000), labels=c("0","2k","4k","6k","8k","10k","12k"))
+
+#grid(nx = BP_abs, ny = NULL, col = "gray", lty = 1, lwd = 1.5) # Para grillado.
+
+text(x = BP_abs, y= as.numeric(carriers_abs) + 400, labels = carriers_abs)
+
+legend("topright", legend = c("DL = Delta Air Lines","FL = AirTran Airways","MQ = Envoy Air","EV = ExpressJet Airlines","UA = United Air Lines","WN = Southwest Airlines","9E = Endeavor Air"), pch = 15, cex = 1.05, pt.cex = 2,
+       col = c("firebrick1","gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+```
+
+En este gráfico de Frecuencias Absolutas podemos ver en valores absolutos cuantos vuelos realizaban en el año $2013$, desde _New York_ a _Atlanta_, distribuidos por aerolineas:
+
+```{r, echo= FALSE, comment=NA}
+absolutas_aerolineas = as.data.frame(carriers_abs)
+
+colnames(absolutas_aerolineas) = c("Aerolinea","Vuelos")
+
+absolutas_aerolineas$Aerolinea = c("Delta Airlines", "AirTran Airways", "Envoy Air", "ExpressJet Airlines", "United Air Lines", "Southwest Airlines", "Endeavor Air")
+
+print(absolutas_aerolineas, row.names = FALSE)
+```
+
+
+- $`r as.numeric(carriers_abs[1])`$ de vuelos realizados con la aerolinea "**_Delta Air Lines_**".
+
+- $`r as.numeric(carriers_abs[2])`$ de vuelos realizados con la aerolinea "**_AirTran Airways_**".
+
+- $`r as.numeric(carriers_abs[3])`$ de vuelos realizados con la aerolinea "**_Envoy Air_**".
+
+- $`r as.numeric(carriers_abs[4])`$ de vuelos realizados con la aerolinea "**_ExpressJet Airlines_**".
+
+- $`r as.numeric(carriers_abs[5])`$ de vuelos realizados con la aerolinea "**_United Air Lines_**".
+
+- $`r as.numeric(carriers_abs[6])`$ de vuelos realizados con la aerolinea "**_Endeavor Air_**".
+
+- $`r as.numeric(carriers_abs[7])`$ de vuelos realizados con la aerolinea "**_Southwest Airlines_**".
+
+```{r barplot frecuencia relativa, echo = FALSE}
+carriers_rel = signif(sort(prop.table(table(datos_atl$carrier)), decreasing = TRUE),2)
+
+BP_rel = barplot(carriers_rel[c(1:7)], 
+        main = "Frecuencias Relativas de los vuelos a Atlanta por carriers",
+        ylim = c(0,0.7), ylab = "Frecuencias Relativas",
+        col = c("firebrick1","gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+
+text(x = BP_rel, y= as.numeric(carriers_rel) + 0.025, labels = carriers_rel)
+
+#grid(nx = BP_abs, ny = NULL, col = "gray", lty = 1, lwd = 1.5) # Para grillado.
+
+legend("topright", legend = c("DL = Delta Air Lines","FL = AirTran Airways","MQ = Envoy Air","EV = ExpressJet Airlines","UA = United Air Lines","WN = Southwest Airlines","9E = Endeavor Air"), pch = 15, cex = 1.05, pt.cex = 2,
+       col = c("firebrick1","gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+```
+
+En este gráfico de _Frecuencias Relativas_ de los vuelos a _Atlanta_ por <u>carriers</u>, podemos observar cuanto represetan los vuelos de cada aerolinea del total de vuelos a _Atlanta_, siendo que:
+
+- $`r as.numeric(carriers_rel[1])`$ es la proporcion de los vuelos realizados por la aerolinea "**_Delta Air Lines_**".
+
+- $`r as.numeric(carriers_rel[2])`$ es la proporcion de los vuelos realizados por la aerolinea "**_AirTran Airways_**".
+
+- $`r as.numeric(carriers_rel[3])`$ es la proporcion de los vuelos realizados por la aerolinea "**_Envoy Air_**".
+
+- $`r as.numeric(carriers_rel[4])`$ es la proporcion de los vuelos realizados por la aerolinea "**_ExpressJet Airlines_**".
+
+- $`r as.numeric(carriers_rel[5])`$ es la proporcion de los vuelos realizados por la aerolinea "**_United Air Lines_**".
+
+- $`r as.numeric(carriers_rel[6])`$ es la proporcion de los vuelos realizados por la aerolinea "**_Endeavor Air_**".
+
+- $`r as.numeric(carriers_rel[7])`$ es la proporcion de los vuelos realizados por la aerolinea "**_Southwest Airlines_**".
+
+En los siguientes gráficos puede observarse en mayor tamaño aquellos vuelos de aerolineas considerados (por mi) como de baja frecuencia ( _Gráfico 1 en Absolutas, Gráfico 2 en Relativas_ ) con respecto a la aerolínea "**_Delta Air Lines_**" porque esta es, sin lugar a duda, la de mayor frecuencia (o que mayor viajes tiene).
+
+```{r barplot baja frecuencia absoluta, echo = FALSE}
+BP2_abs = barplot(carriers_abs[c(2:7)], 
+              ylim = c(0,2500), ylab = "Numero de vuelos",
+              main = "Vuelos a Atlanta por carriers de baja Frecuencia\n Absoluta (<2500 vuelos)", 
+              col = c("gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+
+text(x = BP2_abs, y= as.numeric(carriers_abs[c(2:7)]) + 100, labels = carriers_abs[c(2:7)])
+
+#grid(nx = BP2_abs, ny = NULL, col = "gray", lty = 1, lwd = 1.5) # Para grillado.
+
+legend("topright", legend = c("FL = AirTran Airways","MQ = Envoy Air","EV = ExpressJet Airlines","UA = United Air Lines","WN = Southwest Airlines","9E = Endeavor Air"), pch = 15, cex = 1.05, pt.cex = 2, bty = "n", bg = "white",
+       col = c("gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+```
+
+```{r barplot baja frecuencia relativa, echo = FALSE}
+BP_rel = barplot(carriers_rel[c(2:7)], 
+        main = "Vuelos a Atlanta por carriers de baja Frecuencia\nRelativa (<0.15)",
+        ylim = c(0,0.16), ylab = "Frecuencias Relativas", 
+        col = c("gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+
+text(x = BP_rel, y= as.numeric(carriers_rel[c(2:7)]) + 0.005, labels = carriers_rel[c(2:7)])
+
+#grid(nx = BP_abs, ny = NULL, col = "gray", lty = 1, lwd = 1.5) # Para grillado.
+
+legend("topright", legend = c("FL = AirTran Airways","MQ = Envoy Air","EV = ExpressJet Airlines","UA = United Air Lines","WN = Southwest Airlines","9E = Endeavor Air"), pch = 15, cex = 1.05, pt.cex = 2, bty = "n", bg = "white",
+       col = c("gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+```
+
+Como podemos observar en todos estos gráficos, el carrier "**_Delta Air Lines_**" ($DL$) es el carrier mucho más usado para ir desde _NYC_ a _Atlanta_. ¿Será la mejor aerolinea para viajar?
+
+Ahora nos preguntamos... ¿Por qué es $DL$ es el carrier más usado? ¿Es el carrier que menos retrasos tiene? ¿Es quien compensa más los retrasos llegando a tiempo? ¿Desde que aeropuerto de NYC podría salen los vuelos de esta empresa?
+
+```{r Boxplot Retraso salida con outliers, echo = FALSE}
+datos_atl$carrier <- factor(datos_atl$carrier , levels=c("DL", "FL", "MQ", "EV", "UA", "9E", "WN"))
+
+boxplot(datos_atl$dep_delay~datos_atl$carrier, ylab = "Retraso en la salida (mins)", xlab = "Aerolineas", 
+        main = "Boxplot de las aerolineas en funcion del retraso en la salida.\nCon Outliers", 
+        col = "royalblue1", outline = TRUE)
+
+legend("topright", legend = c("DL = Delta Air Lines","FL = AirTran Airways","MQ = Envoy Air","EV = ExpressJet Airlines","UA = United Air Lines","9E = Endeavor Air","WN = Southwest Airlines"), bty = "n")
+```
+Como podemos observar, si bien todas las aerolineas tienen problemas de retrasos, la empresa " _Delta Air Lines_ " tiene mayores problemas de retrasos que las otras aerolineas, con un maximo de: $`r max(datos_atl$dep_delay[datos_atl$carrier == "DL"])`\hspace{1mm}minutos\hspace{1mm} \tilde= \hspace{1mm}15\hspace{1mm} horas$ de retraso.
+
+Observemos este mismo grafico pero sin los outliers:
+
+```{r Boxplot Retraso salida sin outliers, echo = FALSE}
+medias_salida = aggregate(dep_delay~carrier, data = datos_atl, FUN = function(x){mean(x,na.rm = TRUE)})
+
+datos_atl$carrier <- factor(datos_atl$carrier , levels=c("DL", "FL", "MQ", "EV", "UA", "9E", "WN"))
+
+boxplot(datos_atl$dep_delay~datos_atl$carrier, ylab = "Retraso en la salida (mins)", xlab = "", 
+        names = c("Delta","AirTran","Envoy","ExpressJet","United Air","Endeavor","Southwest"), las = 2,
+        main = "Boxplot de las aerolineas en funcion del retraso en la salida.\nSin Outliers", col = "royalblue1", outline = FALSE)
+
+points(medias_salida[2], col = "violetred", pch = 15)
+
+legend("topright", legend = "Media del retraso en salida", pch = 15, col = "violetred")
+```
+
+Aca podemos observar que la aerolinea que mayor distribucion de tiempo de retraso en salida (**sin outliers**) es " _EXpressJet Airlines_ ", en segundo lugar la aerolinea " _AirTran Airways_ " y en tercer lugar " _Envoy Air_ ".
+
+Una cosa a remarcar en los boxplots de todas estas aerolineas es que la **media aritmetica** (representada por el cuadrado color rosa rojiza) se ve muy afectada por los outliers porque, como es la suma de valores dividido el numero de valores, tener ya uno o varios valores muy por fuera del rango de valores, genera cambios muy groseros.
+
+##### Medias de retraso de salida por aerolinea:
+
+```{r, echo= FALSE, comment=NA}
+medias_ordenadas = medias_salida[order(medias_salida$dep_delay, decreasing = TRUE),]
+medias_ordenadas$dep_delay = round(medias_ordenadas$dep_delay, 2)
+
+colnames(medias_ordenadas) = c("Aerolinea", "Media (Mins)")
+
+medias_ordenadas$Aerolinea = c("ExpressJet Airlines", "AirTran Airways", "United Air Lines", "Delta Air Lines", "Envoy Air", "Southwest Airlines", "Endeavor Air")
+
+print(medias_ordenadas, row.names = FALSE)
+```
+
+\newpage
+
+Tambien podemos calcular la **desviacion mediana absoluta (DMA)** para que, aquellas aerolineas que su media se encuentre muy modificada por valores muy pequeños o muy grandes, puedan ser comparadas e influenciadas por su valor del medio (mediana) que no es tan facil de modificar.
+
+> **Calculo de la desviacion mediana absoluta:**
+
+> _Resultado = Valor absoluto de cada valor - la mediana de los valores_
+
+> _...Utilizando un valor estadistico $k= 1.4826$_
+
+> $(DMA) = mediana(Resultado) \cdot k$
+
+
+```{r Funcion para calcular MAD delay salida, echo = FALSE}
+MAD = function(aerolinea){
+  absoluta = abs(datos_atl$dep_delay[which(datos_atl$carrier==aerolinea)]-median(datos_atl$dep_delay[which(datos_atl$carrier==aerolinea)]))
+k = 1.4826
+MAD1 = median(absoluta) * k
+return(MAD1)
+}
+```
+
+
+```{r Barplot MAD retraso de salida, echo = FALSE}
+mads = sort(c(MAD("DL"),MAD("FL"),MAD("MQ"),MAD("EV"),MAD("UA"),MAD("9E"),MAD("WN")),decreasing = TRUE)
+
+BP_mad = barplot(mads, names.arg = c("AirTran","ExpressJet","Envoy","Delta","United Air","Southwest","Endeavor"), 
+        ylim = c(0,12), ylab = "Desviacion Mediana Absoluta (MAD)", las = 2,
+        col = c("gold1","purple3","cyan","firebrick1","lightgreen", "blue", "chocolate1"),
+        main = "Desviacion Mediana Absoluta del retraso de salida por carrier")
+
+text(x = BP_mad, y= mads + 0.5, labels = mads)
+
+#grid(nx = NA, ny = NULL, col = "grey", lty = 3) # Para activar el grillado
+
+legend("topright", legend = c("Delta Air Lines","AirTran Airways","Envoy Air","ExpressJet Airlines","United Air Lines","Endeavor Air","Southwest Airlines"), pch = 15, cex = 1.05, pt.cex = 2, col = c("firebrick1","gold1","cyan","purple3","lightgreen", "chocolate1", "blue"))
+```
+
+Por lo visto, por más de que tenga muchos _outliers_ la empresa " _Delta Air Lines_", según el MAD, la dispersion en cuanto a el retraso de la salida del vuelo es dentro de todo estable. No es tan variable el tiempo que hay que esperar para que salga el vuelo, en comparacion con otras aerolineas como " _AirTran Airways_ " y " _ExpressJet Airlines_ " que tiene un valor de dispersion muy alto, lo cual interpreto como un mayor tiempo de espera para que salga un vuelo.
+
+Veamos lo mismo pero en el caso del retraso de la llegada (historicamente), ¿Será que " _Delta Air Lines_" tiene menos retrasos en salida pero tiene más retrasos en llegar?
+
+```{r Boxplots Retrasos en llegada, echo = FALSE}
+medias_llegada = aggregate(arr_delay~carrier, data = datos_atl, FUN = function(x){mean(x,na.rm = TRUE)})
+
+boxplot(datos_atl$arr_delay~datos_atl$carrier, ylab = "Retraso en la llegada (mins)", xlab = "", names = c("Delta","AirTran","Envoy","ExpressJet","United Air","Endeavor","Southwest"), las = 2, main = "Boxplot de las aerolineas en funcion del retraso en la llegada\nCon Outliers", col = "royalblue1")
+
+# points(medias_llegada[2], col = "violetred", pch = 15)
+
+legend("topright", legend = "Media del retraso en llegada", pch = 15, col = "violetred")
+
+boxplot(datos_atl$arr_delay~datos_atl$carrier, ylab = "Retraso en la llegada (mins)", xlab = "", names = c("Delta","AirTran","Envoy","ExpressJet","United Air","Endeavor","Southwest"), las = 2, main = "Boxplot de las aerolineas en funcion del retraso en la llegada\nSin Outliers", col = "royalblue1", outline = FALSE)
+
+points(medias_llegada[2], col = "violetred", pch = 15)
+
+legend("topright", legend = "Media del retraso en llegada", pch = 15, col = "violetred")
+```
+
+Una vez más, tenemos dos gráficos de caja, uno con outliers y otro sin outliers para poder ver los outliers y otro para apreciar bien la caja, respectivamente.
+
+Como podemos observar, el carrier con retrasos de llegada menos dispersos es " _Southwest Airlines_ " y el que tiene retrasos más dispersos es (dentro de su distribucion) es la aerolinea " _ExpressJet Airlines_ ".
+
+Deteniendonos en la empresa " _Delta Airlines_ " podemos ver que tiene una distribucion de tiempos de espera mucho más variado que la aerolinea " _Sothwest Airlines_ ", además que es la que más retraso maximo de llegada tiene $( `r max(datos_atl$arr_delay[which(datos_atl$carrier=="DL")])` \hspace{1mm} Minutos \hspace{1mm} \tilde= 15\hspace{1mm}hs)$ pero aún así no es tan disperso como el de " _ExpressJet Airlines_ ".
+
+```{r Funcion para calcular MAD delay llegada, echo = FALSE}
+MAD2 = function(aerolinea){
+  absoluta = abs(datos_atl$arr_delay[which(datos_atl$carrier==aerolinea)]-median(datos_atl$arr_delay[which(datos_atl$carrier==aerolinea)]))
+k = 1.4826
+MAD1 = median(absoluta) * k
+return(MAD1)
+}
+```
+
+
+```{r Barplot MAD retraso en llegada, echo = FALSE}
+mads_llegada = sort(c(MAD2("DL"),MAD2("FL"),MAD2("MQ"),MAD2("EV"),MAD2("UA"),MAD2("9E"),MAD2("WN")),decreasing = TRUE)
+
+BP_mad = barplot(mads_llegada, ylim = c(0,30), ylab = "Desviacion Mediana Absoluta (MAD)",
+        col = c("gold1","purple3","cyan","firebrick1","lightgreen", "blue", "chocolate1"),
+        names.arg = c("AirTran","ExpressJet","Envoy","Delta","United Air","Southwest","Endeavor"), las = 2,
+        main = "Desviacion Mediana Absoluta del retraso de llegada por carrier")
+
+text(x = BP_mad, y= mads_llegada + 1, labels = mads_llegada)
+
+#grid(nx = NA, ny = NULL, col = "grey", lty = 3) # Para activar el grillado
+```
+
+Analizando ahora el $MAD$ del retraso de llegada por carrier, podemos ver que la empresa " _Endeavor Airlines_ " es la que menos distribuidos tiene su retraso de llegada, siendo la que más varía la aerolínea " _AirTran Airlines_ " entorno a un valor.
+
+Enfocando la mirada una vez más sobre la aerolinea " _Delta Airlines_ ", podemos ver que si bien sus valores de retrasos estan bastante distribuidos, no estan tan distribuidos como otras empresas pero tampoco esta pobremente distribuidos como otras empresas, sino que mas bien se encuentra en un punto medio con respecto a otras aerolineas.
+
+Lamentablemente, el dataset no incluye el precio de los boletos de cada aerolinea para ir a Atlanta, lo cual sería muy útil para concluir porque la empresa " _Delta Airlines_ " es la más utilizada para viajar, porque viendo los retrasos, se ve bien que " _Endeavor Air_ " es la que menos retrasos tiene, la que más estable tiene sus horarios.
+
+Para concluir, vamos a ver que aeropuerto es el más usado por la aerolínea " _Delta Air Lines_ ".
+
+```{r Barplot de aeropuerto mas usado por DL, echo=FALSE}
+aeropuerto_origen = table(datos_atl$origin[which(datos_atl$carrier == "DL")])
+
+BP_origen = barplot(aeropuerto_origen, names.arg = c("Newark Liberty Intl", "John F Kennedy Intl", "La Guardia"),
+        ylim = c(0,6000), col = c("royalblue4", "red2", "gold"), yaxt = "n", ylab = "Frecuencia Absoluta de vuelos",
+        xlab = "Aeropuerto de origen, desde New York City", cex.axis = 2,
+        main = "Frecuencia de vuelos con el carrier Delta Air lines\npor aeropuerto de New York a Atlanta")
+
+axis(2, at=c(0,1000,2000,3000,4000,5000,6000), labels=c("0","1k","2k","3k","4k","5k","6k"), las = 2)
+
+text(x = BP_origen, y = aeropuerto_origen + 200, label = aeropuerto_origen)
+```
+
+Podemos ver que la mayoría de los vuelos que salen de _New York_ con destino a _Atlanta_ por la aerolínea " _Delta Airlines_ " salen del aeropuerto "**_La Guardia_**".
+
+# **Conclusión**:
+
+Podríamos decir que posiblemente la aerolínea " _Delta Airlines_ " es la que más vuelos tiene posiblemente por su fama, aunque no es la empresa que menos retrasos tenga, sino más bien es una intermedia. Tal vez será por su mayor disponibilidad de vuelos en muchas fechas y horarios. Además de que tal vez es la empresa con boletos más baratos.
+
+En tal caso si estuvieramos apurados con la necesidad de viajar desde New York a Atlanta y llegar rapidamente, seguro tomariamos el vuelo de " _Endeavor Airlines_ " porque es la que menos retraso salida y de llegada tiene. Tal vez no es la mas usada porque tiene menos disponibilidad de vuelos, menos fechas y horarios de vuelos o porque es muy cara. Con los datos disponibles no podemos saberlo.

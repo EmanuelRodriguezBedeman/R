@@ -1,0 +1,431 @@
+---
+title: "NYC Flights"
+author: "Emanuel Rodriguez Bedeman"
+date: "7/12/2021"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+```
+
+\newpage
+
+# Flight Analysis from New York City (_NYC_) to Atlanta (_ATL_)
+
+Curiosity has aroused me and I started investigatin the flights from **NYC** to **Atlanta**
+
+
+```{r Data import, echo = FALSE}
+# Import the data without NA's and with some specific columns and destiny to atlanta
+data_atl <- na.omit(nycflights13::flights[nycflights13::flights$dest=="ATL",c("dep_delay", "arr_delay", "carrier", "origin")])
+```
+
+### from the **total flights** $(`r nrow(nycflights13::flights)`)$, only $`r nrow(data_atl)`$ went to Atlanta. 
+
+### Which, in **porcentage**, is equal to:
+
+# $$\left( \frac{Total \hspace{1mm} Flights}{Atlanta \hspace{1mm} Flights}\right) \cdot 100 =`r signif(nrow(data_atl) / nrow(nycflights13::flights) * 100, 2)` \%$$ 
+
+### The available airlines to travel from **NYC** to **ATL** are:
+
+```{r, echo = FALSE, results=FALSE}
+airlines2 = c("DL = Delta Air Lines",
+               "FL = AirTran Airways",
+               "MQ = Envoy Air",
+               "EV = ExpressJet Airlines",
+               "UA = United Air Lines",
+               "WN = Southwest Airlines",
+               "9E = Endeavor Air")
+
+airlines = c("Delta Air Lines",
+               "AirTran Airways",
+               "Envoy Air",
+               "ExpressJet Airlines",
+               "United Air Lines",
+               "Southwest Airlines",
+               "Endeavor Air")
+```
+
+<font size="5">
+
+**Abbreviation**   | **Airline**
+------------------|--------------
+DL                | Delta Air Lines
+FL                | AirTran Airways
+MQ                | Envoy Air
+EV                | ExpressJet Airlines
+UA                | United Air Lines
+WN                | Southwest Airlines
+9E                | Endeavor Air
+
+</font>
+
+\newpage
+
+```{r barplot Absolute frecuency, echo = FALSE}
+carriers_abs = sort(table(data_atl$carrier), decreasing = TRUE)
+
+BP_abs = barplot(carriers_abs[c(1:7)],ylim = c(0,12000), 
+        main = "Absolute frequencies of flights to Atlanta by airline",
+        ylab = "No. of flights (1k = 1000)", yaxt = "n",
+        col = c("firebrick1","gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+
+axis(2, at=c(0,2000,4000,6000,8000,10000,12000), labels=c("0","2k","4k","6k","8k","10k","12k"))
+
+text(x = BP_abs, y= as.numeric(carriers_abs) + 400, labels = carriers_abs)
+
+legend("topright", legend = airlines, pch = 15, cex = 1.05, pt.cex = 2,
+       col = c("firebrick1","gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+```
+
+In this graph of Absolute Frequencies we can see flights made in the year $2013$, from _New York_ to _Atlanta_, distributed by airlines:
+
+- $10452$ of flights made with the airline "**_Delta Air Lines_**".
+
+- $`r as.numeric(carriers_abs[2])`$ of flights made with the airline "**_AirTran Airways_**".
+
+- $`r as.numeric(carriers_abs[3])`$ of flights made with the airline "**_Envoy Air_**".
+
+- $`r as.numeric(carriers_abs[4])`$ of flights made with the airline "**_ExpressJet Airlines_**".
+
+- $`r as.numeric(carriers_abs[5])`$ of flights made with the airline "**_United Air Lines_**".
+
+- $`r as.numeric(carriers_abs[6])`$ of flights made with the airline "**_Endeavor Air_**".
+
+- $`r as.numeric(carriers_abs[7])`$ of flights made with the airline "**_Southwest Airlines_**".
+
+
+```{r barplot Relative Frequency, echo = FALSE}
+carriers_rel = signif(sort(prop.table(table(data_atl$carrier)), decreasing = TRUE),2)
+
+BP_rel = barplot(carriers_rel[c(1:7)], 
+        main = "Relative Frequencies of Flights to Atlanta by airline",
+        ylim = c(0,0.7), ylab = "Relative Frequencies",
+        col = c("firebrick1","gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+
+text(x = BP_rel, y= as.numeric(carriers_rel) + 0.025, labels = carriers_rel)
+
+#grid(nx = BP_abs, ny = NULL, col = "gray", lty = 1, lwd = 1.5) # Para grillado.
+
+legend("topright", legend = airlines, pch = 15, cex = 1.05, pt.cex = 2,
+       col = c("firebrick1","gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+```
+
+In this graph of _Relative Frequencies_ of the flights to _Atlanta_ by <u> carriers </u>, we can see how much the flights of each airline represent of the total flights to _Atlanta_, being that:
+
+- $`r as.numeric(carriers_rel[1])`$ is the proportion of flights made by the airline "**_Delta Air Lines_**".
+
+- $`r as.numeric(carriers_rel[2])`$ is the proportion of flights made by the airline "**_AirTran Airways_**".
+
+- $`r as.numeric(carriers_rel[3])`$ is the proportion of flights made by the airline "**_Envoy Air_**".
+
+- $`r as.numeric(carriers_rel[4])`$ is the proportion of flights made by the airline "**_ExpressJet Airlines_**".
+
+- $`r as.numeric(carriers_rel[5])`$ is the proportion of flights made by the airline "**_United Air Lines_**".
+
+- $`r as.numeric(carriers_rel[6])`$ is the proportion of flights made by the airline "**_Endeavor Air_**".
+
+- $`r as.numeric(carriers_rel[7])`$ is the proportion of flights made by the airline "**_Southwest Airlines_**".
+
+\newpage
+
+# Absolute low frequency airlines (<2,500 flights)
+
+In the following graphs you can see in greater detail those airline flights considered (by me) as low frequency with respect to "**_Delta Air Lines_**" because this is, without a doubt, the one with the most trips.
+
+```{r barplot Absolute Low Frequency, echo = FALSE}
+BP2_abs = barplot(carriers_abs[c(2:7)], 
+              ylim = c(0,2500), ylab = "Number of flights",
+              main = "Flights to Atlanta on Absolute Low Frequency", 
+              col = c("gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+
+text(x = BP2_abs, y= as.numeric(carriers_abs[c(2:7)]) + 100, labels = carriers_abs[c(2:7)])
+
+#grid(nx = BP2_abs, ny = NULL, col = "gray", lty = 1, lwd = 1.5) # Para grillado.
+
+legend("topright", legend = airlines[c(2:7)], pch = 15, cex = 1.05, pt.cex = 2, bty = "n", bg = "white",
+       col = c("gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+```
+
+# Relative low frequency airlines (<0.15)
+
+```{r barplot Relative Low Frequency, echo = FALSE}
+BP_rel = barplot(carriers_rel[c(2:7)], 
+        main = "Relative Low Frequency Flights to Atlanta",
+        ylim = c(0,0.16), ylab = "Relative Frequency", 
+        col = c("gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+
+text(x = BP_rel, y= as.numeric(carriers_rel[c(2:7)]) + 0.005, labels = carriers_rel[c(2:7)])
+
+legend("topright", legend = airlines[c(2:7)], pch = 15, cex = 1.05, pt.cex = 2, bty = "n", bg = "white",
+       col = c("gold1","cyan","purple3","lightgreen", "blue", "chocolate1"))
+```
+
+#### As we can see in all these graphs, the carrier "**_Delta Air Lines_**" ($ DL $) is the most used airline (and by far) to go from _NYC_ to _Atlanta_.
+- Will it be the best airline to travel?
+- Why is $DL$ the most used carrier?
+-Is it the carrier with the least delays?
+- Is it the person who compensates the most for the delays by arriving on time?
+- How many Delta Air Lines company flights depart from each NYC airport to Atlanta?
+
+\newpage
+
+# Departure delays
+
+```{r Boxplot Departure delays with outliers, echo = FALSE}
+data_atl$carrier <- factor(data_atl$carrier , levels=c("DL", "FL", "MQ", "EV", "UA", "9E", "WN"))
+
+boxplot(data_atl$dep_delay~data_atl$carrier, ylab = "Departure delay (mins)", xlab = "Airlines", 
+        main = "Departure delay by airlines with Outliers", 
+        col = "royalblue1", outline = TRUE)
+
+legend("topright", legend = airlines2, bty = "n")
+```
+As we can see, although all airlines have delay problems, the company "**_Delta Air Lines_**" is the one that has the greatest problems to meet the departure time, with a maximum of: $`r max(data_atl$dep_delay[data_atl$carrier == "DL"])`\hspace{1mm}minutos\hspace{1mm} \tilde= \hspace{1mm}15\hspace{1mm} horas$ of delay.
+
+Then it follows, both in greater time of delay and greater problems to comply with the schedule:
+
+- "**_Airtran Airways_**" with a maximum of $`r max(data_atl$dep_delay[data_atl$carrier == "FL"])`\hspace{1mm}minutos\hspace{1mm} \tilde= \hspace{1mm}10\hspace{1mm} horas$ of delay.
+
+- "**_ExpressJet Airlines_**" with a maximum of $`r max(data_atl$dep_delay[data_atl$carrier == "EV"])`\hspace{1mm}minutos\hspace{1mm} \tilde= \hspace{1mm}7\hspace{1mm} horas$ of delay.
+
+- "**_United Air Lines_**" with a maximum of $`r max(data_atl$dep_delay[data_atl$carrier == "UA"])`\hspace{1mm}minutos\hspace{1mm} \tilde= \hspace{1mm}6\hspace{1mm} horas$ of delay.
+
+- "**_Envoy Air_**" with a maximum of $`r max(data_atl$dep_delay[data_atl$carrier == "MQ"])`\hspace{1mm}minutos\hspace{1mm} \tilde= \hspace{1mm}5\hspace{1mm} horas$ of delay.
+
+- "**_Southwest Airlines_**" with a maximum of $`r max(data_atl$dep_delay[data_atl$carrier == "WN"])`\hspace{1mm}minutos\hspace{1mm} \tilde= \hspace{1mm}1,3\hspace{1mm} horas$ delay.
+
+- "**_Endeavor Air_**" with a maximum of $`r max(data_atl$dep_delay[data_atl$carrier == "9E"])`\hspace{1mm}minutos\hspace{1mm} \tilde= \hspace{1mm}1\hspace{1mm} horas$ of delay.
+
+Airline | Minutes | Hours
+----------|----------------|----------------
+Delta Airlines | 898 | 15
+Airtran Airways | 602 | 10
+ExpressJet Airlines | 431 | 7
+United Airlines | 336 | 6
+Envoy Air | 299 | 5
+Southwest Airlines | 77 | 1,3
+Endeavor Air | 62 | 1
+
+
+### Let's look at this same graph but without the outliers:
+
+```{r Boxplot Departure Delay without Outliers, echo = FALSE}
+medias_salida = aggregate(dep_delay~carrier, data = data_atl, FUN = function(x){mean(x,na.rm = TRUE)})
+
+data_atl$carrier <- factor(data_atl$carrier , levels=c("DL", "FL", "MQ", "EV", "UA", "9E", "WN"))
+
+boxplot(data_atl$dep_delay~data_atl$carrier, ylab = "Departure delay (mins)", xlab = "", 
+        names = c("Delta","AirTran","Envoy","ExpressJet","United Air","Endeavor","Southwest"), las = 2,
+        main = "Delay in departure depending on the airlines without Outliers", col = "royalblue1", outline = FALSE)
+
+points(medias_salida[2], col = "violetred", pch = 15)
+
+legend("topright", legend = "Average departure delay", pch = 15, col = "violetred")
+```
+
+Here we can see that the airline with the greatest distribution of departure delay time (**WITHOUT OUTLIERS**) is "_EXpressJet Airlines_", in second place the airline "_AirTran Airways_" and in third place "_Envoy Air_". It should be noted that these two airlines have the most cases in which the flight left earlier!
+
+One thing to note in the boxplots of all these airlines is that the **arithmetic mean** (represented by the reddish-pink square) is greatly affected by the outliers because, as is the sum of values divided by the number of values, already having one or more values far outside the range of values generates very rude changes.
+
+##### Average departure delay by airline:
+
+```{r, echo= FALSE, comment=NA, results='hide'}
+medias_ordenadas = medias_salida[order(medias_salida$dep_delay, decreasing = TRUE),]
+medias_ordenadas$dep_delay = round(medias_ordenadas$dep_delay, 2)
+
+colnames(medias_ordenadas) = c("Aerolinea", "Media(Mins)")
+
+medias_ordenadas$Aerolinea = c("ExpressJet Airlines", "AirTran Airways", "United Air Lines", "Delta Air Lines", "Envoy Air", "Southwest Airlines", "Endeavor Air")
+
+print(medias_ordenadas, row.names = FALSE)
+```
+
+Airlne | Average(mins)
+----------|----------------
+ExpressJet Airlines | 22.26
+AirTran Airways | 18.27
+United Air Lines | 14.67
+Delta Air Lines | 10.35
+Envoy Air | 9.33
+Southwest Airlines | 2.34
+Endeavor Air | 0.98
+
+\newpage
+
+# Absolute Median Deviation for the departure delay
+
+We can also calculate the ** absolute median deviation (DMA) ** so that those airlines whose mean is highly modified by very small or very large values, can be compared by their mean value (median), which is not so easy. to modify.
+
+> **Calculation of the absolute median deviation:**
+
+> Result = Absolute value of each value - the median of the values
+
+> _... Using a statistical value $ k = 1.4826 $ _
+
+> $(DMA) = median (Result) \cdot k$
+
+
+```{r Function to calculate MAD delay output, echo = FALSE}
+MAD = function(aerolinea){
+  absoluta = abs(data_atl$dep_delay[which(data_atl$carrier==aerolinea)]-median(data_atl$dep_delay[which(data_atl$carrier==aerolinea)]))
+k = 1.4826
+MAD1 = median(absoluta) * k
+return(MAD1)
+}
+```
+
+
+```{r Barplot MAD retraso de salida, echo = FALSE}
+mads = sort(c(MAD("DL"),MAD("FL"),MAD("MQ"),MAD("EV"),MAD("UA"),MAD("9E"),MAD("WN")),decreasing = TRUE)
+
+BP_mad = barplot(mads, names.arg = c("AirTran","ExpressJet","Envoy","Delta Air","United Air","Southwest","Endeavor"), 
+        ylim = c(0,12), ylab = "Median Absolute Deviation (MAD)", las = 2,
+        col = c("gold1","purple3","cyan","firebrick1","lightgreen", "blue", "chocolate1"),
+        main = "Median Absolute Deviation of the departure delay by carrier")
+
+text(x = BP_mad, y= mads + 0.5, labels = mads)
+```
+
+Apparently, even though the company "_Delta Air Lines_" has many _outliers_, according to the MAD, the dispersion in terms of the delay of the flight departure is within all stable (it remains close to a central value).
+
+The time to wait for the flight to depart is not so variable, compared to other airlines such as "_AirTran Airways_" and "_ExpressJet Airlines_" which has a very high dispersion, which I interpret as a longer waiting time for it to depart. a flight.
+
+\newpage
+
+# Arrival delays
+
+```{r Boxplots Arrival delays (Outliers), echo = FALSE}
+medias_llegada = aggregate(arr_delay~carrier, data = data_atl, FUN = function(x){mean(x,na.rm = TRUE)})
+
+boxplot(data_atl$arr_delay~data_atl$carrier, ylab = "Arrival delay (mins)", xlab = "", names = c("Delta Air","AirTran","Envoy","ExpressJet","United Air","Endeavor","Southwest"), las = 2, main = "Delay in arrival depending on the airlines with Outliers", col = "royalblue1")
+
+# points(medias_llegada[2], col = "violetred", pch = 15) # To mark the average
+
+# legend("topright", legend = "Media del retraso en llegada", pch = 15, col = "violetred") # Legend
+```
+
+We see again that the company "**_Delta Air Lines_**" is the one with the greatest delay problems but in this case to comply with the arrival time, with a maximum of: $`r max(data_atl$arr_delay[data_atl$carrier == "DL"])`\hspace{1mm}minutos\hspace{1mm} \tilde= \hspace{1mm}15\hspace{1mm} horas$ late.
+
+Then it follows, both in greater time of delay and in greater problems to comply with the schedule:
+
+- "**_Airtran Airways_**" with a maximum of $`r max(data_atl$arr_delay[data_atl$carrier == "FL"])`\hspace{1mm}minutos\hspace{1mm} \tilde= \hspace{1mm}10\hspace{1mm} horas$ of delay.
+
+- "**_ExpressJet Airlines_**" with a maximum of $`r max(data_atl$arr_delay[data_atl$carrier == "EV"])`\hspace{1mm}minutos\hspace{1mm} \tilde= \hspace{1mm}8\hspace{1mm} horas$ of delay.
+
+- "**_United Air Lines_**" with a maximum of $`r max(data_atl$arr_delay[data_atl$carrier == "UA"])`\hspace{1mm}minutos\hspace{1mm} = \hspace{1mm}6\hspace{1mm} horas$ late.
+
+- "**_Envoy Air_**" with a maximum of $`r max(data_atl$arr_delay[data_atl$carrier == "MQ"])`\hspace{1mm}minutos\hspace{1mm} \tilde= \hspace{1mm}5\hspace{1mm} horas$ of delay.
+
+- "**_Southwest Airlines_**" with a maximum of $`r max(data_atl$arr_delay[data_atl$carrier == "WN"])`\hspace{1mm}minutos\hspace{1mm} \tilde= \hspace{1mm}1\hspace{1mm} horas$ of delay.
+
+- "**_Endeavor Air_**" with a maximum of $`r max(data_atl$arr_delay[data_atl$carrier == "9E"])`\hspace{1mm}minutos\hspace{1mm} \tilde= \hspace{1mm}1\hspace{1mm} horas$ of delay.
+
+Airline | Minutes | Hours
+----------|----------------|----------------
+Delta Airlines | 895 | 15
+Airtran Airways | 572 | 10
+ExpressJet Airlines | 454 | 8
+United Airlines | 360 | 6
+Envoy Air | 344 | 6
+Southwest Airlines | 64 | 1
+Endeavor Air | 55 | 1
+
+```{r Boxplots Arrival Delay (without Outliers), echo = FALSE}
+boxplot(data_atl$arr_delay~data_atl$carrier, ylab = "Arrival delay (mins)", xlab = "", names = c("Delta","AirTran","Envoy","ExpressJet","United Air","Endeavor","Southwest"), las = 2, main = "Delay in arrival depending on the airlines without Outliers", col = "royalblue1", outline = FALSE)
+
+points(medias_llegada[2], col = "violetred", pch = 15)
+
+legend("topright", legend = "Average Arrival Delay", pch = 15, col = "violetred")
+```
+
+# Average arrival delay by airline:
+
+```{r, echo= FALSE, comment=NA, results='hide'}
+medias_ordenadas2 = medias_llegada[order(medias_llegada$arr_delay, decreasing = TRUE),]
+medias_ordenadas2$arr_delay = round(medias_ordenadas2$arr_delay, 2)
+
+colnames(medias_ordenadas2) = c("Aerolinea", "Media(Mins)")
+
+medias_ordenadas2$Aerolinea = c("AirTran Airways", "ExpressJet Airlines", "Envoy Air", "United Air Lines", "Delta Air Lines", "Southwest Airlines", "Endeavor Air")
+
+print(medias_ordenadas2, row.names = FALSE)
+```
+
+Airline | Average(Mins)
+----------|----------------
+AirTran Airways | 20.74
+ExpressJet Airlines | 19.64
+Envoy Air | 14.03
+United Air Lines | 10.50
+Delta Air Lines | 7.42
+Southwest Airlines | 6.90
+Endeavor Air | 0.86
+
+As we can see, the carrier with the least dispersed arrival delays (**WITHOUT OUTLIERS**) is "_Southwest Airlines_" and the one with more dispersed delays is the airline "_ExpressJet Airlines_".
+
+Stopping at the company "_Delta Airlines_" we can see that it has a much more varied distribution of waiting times than the airline "_Sothwest Airlines_", besides that it is the one with the greatest maximum arrival delay ($15$hs) but still it is not as scattered as "_ExpressJet Airlines_".
+
+\newpage
+
+# Median Absolute Deviation
+
+```{r Function to calculate MAD delay arrival, echo = FALSE}
+MAD2 = function(aerolinea){
+  absoluta = abs(data_atl$arr_delay[which(data_atl$carrier==aerolinea)]-median(data_atl$arr_delay[which(data_atl$carrier==aerolinea)]))
+k = 1.4826
+MAD1 = median(absoluta) * k
+return(MAD1)
+}
+```
+
+
+```{r Barplot MAD late arrival, echo = FALSE}
+mads_llegada = sort(c(MAD2("DL"),MAD2("FL"),MAD2("MQ"),MAD2("EV"),MAD2("UA"),MAD2("9E"),MAD2("WN")),decreasing = TRUE)
+
+BP_mad = barplot(mads_llegada, ylim = c(0,30), ylab = "Median Absolute Deviation (MAD)",
+        col = c("gold1","purple3","cyan","firebrick1","lightgreen", "blue", "chocolate1"),
+        names.arg = c("AirTran","ExpressJet","Envoy","Delta","United Air","Southwest","Endeavor"), las = 2,
+        main = "Absolute Median Deviation of arrival delay by carrier")
+
+text(x = BP_mad, y= mads_llegada + 1, labels = mads_llegada)
+```
+
+Now analyzing the $MAD$ of the arrival delay by carrier, we can see that the company "_Endeavor Airlines_" is the one that has the least distributed arrival delay, being the airline "_AirTran Airlines_" the one that varies the most.
+
+Focusing our gaze once more on the airline "_Delta Airlines_", we can see that although its delay values are quite distributed, they are not as distributed as other companies but it is not poorly distributed as other companies, but rather it is in a midpoint with respect to other airlines.
+
+Unfortunately, the dataset does not include the price of the tickets of each airline to go to Atlanta, which would be very useful to know why the company "_Delta Airlines_" is the most used to travel, because seeing the delays, it is clear that "_Endeavor Air_" is the one with the least delays, this means that it is the one that complies with the schedules the most.
+
+\newpage
+
+# Flights through NYC airport to Atlanta by Delta Airlines
+
+To conclude, we are going to see which airport is the most used by the airline "_Delta Air Lines_".
+
+```{r Barplot of the airport most used, echo=FALSE}
+aeropuerto_origen = table(data_atl$origin[which(data_atl$carrier == "DL")])
+
+BP_origen = barplot(aeropuerto_origen, names.arg = c("Newark Liberty Intl", "John F Kennedy Intl", "La Guardia"),
+        ylim = c(0,6000), col = c("royalblue4", "red2", "gold"), yaxt = "n", ylab = "Absolute frequency of flights",
+        xlab = "Airport of origin, from New York City", cex.axis = 2,
+        main = "Delta Air lines flight frequency \ nby New York airport to Atlanta")
+
+axis(2, at=c(0,1000,2000,3000,4000,5000,6000), labels=c("0","1k","2k","3k","4k","5k","6k"), las = 2)
+
+text(x = BP_origen, y = aeropuerto_origen + 200, label = aeropuerto_origen)
+```
+
+We can see that most of the flights departing from _New York_ bound for _Atlanta_ by the airline "_Delta Airlines_" depart from the airport "**_La Guardia_**".
+
+# **Conclusion**:
+
+We could say that possibly the airline "_Delta Airlines_" is the one with the most flights, possibly due to its fame, although it is not the company with the least delays, but rather it is an intermediate one. Perhaps it will be due to its greater availability of flights on many dates and times. In addition to that perhaps it is the company with the cheapest tickets.
+
+In this case, if we were in a hurry with the need to travel from New York to Atlanta and get there quickly, we would surely take the "_Endeavor Airlines_" flight because it is the one with the least departure and arrival delay. Perhaps it is not the most used because it has less availability of flights, fewer dates and times of flights or because it is very expensive. With the available data we cannot know.
+
+End of analysis.
